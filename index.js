@@ -20,11 +20,13 @@ app.post("/generate-code", async (c) => {
     if (!swaggerUrl && (!swaggerJson || !language)) {
         return c.json({ error: "Missing required parameters" }, 400);
     }
-
-    // 将 Swagger JSON 保存到临时文件
-    const tempSwaggerPath = path.join(os.tmpdir(), "swagger.json");
-    fs.writeFileSync(tempSwaggerPath, swaggerJson);
-
+    let input = swaggerUrl;
+    if (!swaggerUrl) {
+        // 将 Swagger JSON 保存到临时文件
+        const tempSwaggerPath = path.join(os.tmpdir(), "swagger.json");
+        fs.writeFileSync(tempSwaggerPath, swaggerJson);
+        input = tempSwaggerPath;
+    }
     // 输出目录
     const outputPath = path.resolve("./out", outputDir || language);
 
@@ -37,7 +39,7 @@ app.post("/generate-code", async (c) => {
         "swaggerapi/swagger-codegen-cli",
         "generate",
         "-i",
-        tempSwaggerPath, // 使用临时文件路径
+        input,
         "-l",
         language,
         "-o",
@@ -60,7 +62,7 @@ app.post("/generate-code", async (c) => {
     // 捕获进程结束
     dockerProcess.on("close", (code) => {
         // 删除临时文件
-        fs.unlinkSync(tempSwaggerPath);
+        if (tempSwaggerPath) fs.unlinkSync(tempSwaggerPath);
 
         if (code !== 0) {
             return c.json({ error: `Code generation failed with exit code ${code}` }, 500);
