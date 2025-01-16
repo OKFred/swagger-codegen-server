@@ -1,0 +1,15 @@
+{
+  "name": "swagger-codegen-server",
+  "version": "1.0.0",
+  "description": "serving apis for swagger-codegen",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "fredzh",
+  "license": "MIT",
+  "dependencies": {
+    "hono": "^4.6.16"
+  }
+}
