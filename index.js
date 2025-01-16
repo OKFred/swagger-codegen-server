@@ -1,3 +1,4 @@
+import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { spawn } from "child_process";
 import fs from "fs";
@@ -96,6 +97,7 @@ app.post("/generate-code", async (c) => {
 });
 
 // 启动服务器
-app.listen(8787, () => {
-    console.log("Server running at http://localhost:3000");
+serve({
+    port: 3000,
+    fetch: app.fetch,
 });
