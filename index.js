@@ -100,6 +100,6 @@ app.post("/generate-code", async (c) => {
 serve({
     port: 8787,
     fetch: app.fetch,
-}).then(() => {
-    console.log("Server started at http://localhost:8787");
 });
+
+console.log("Server started at http://localhost:8787");
