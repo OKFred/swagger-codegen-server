@@ -98,6 +98,8 @@ app.post("/generate-code", async (c) => {
 
 // 启动服务器
 serve({
-    port: 3000,
+    port: 8787,
     fetch: app.fetch,
+}).then(() => {
+    console.log("Server started at http://localhost:8787");
 });
