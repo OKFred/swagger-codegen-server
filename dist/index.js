@@ -120,6 +120,8 @@ app.post("/generate-code", async (c) => {
         return c.json({ error: e instanceof Error ? e.message : String(e) }, 400);
     }
 });
+app.get("/", (c) => c.json({ ok: true, message: new Date().toLocaleString() }));
+app.notFound((c) => c.json({ error: "Not found" }, 404));
 // 启动服务器
 serve({
     port: 8787,
