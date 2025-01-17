@@ -19,8 +19,8 @@ app.post("/generate-code", async (c) => {
     }
     requestProcessing = true;
     const bodyObj = await c.req.json();
-    const { swaggerUrl, swaggerJson, language, output } = bodyObj;
-    if (!swaggerUrl && (!swaggerJson || !language)) {
+    const { swaggerUrl, swaggerJson, lang, output } = bodyObj;
+    if (!swaggerUrl && (!swaggerJson || !lang)) {
         requestProcessing = false;
         return c.json({ error: "Missing required parameters" }, 400);
     }
@@ -42,12 +42,6 @@ app.post("/generate-code", async (c) => {
         mountDir,
         imageName,
         "generate",
-        // "-i",
-        // input,
-        // "-l",
-        // language,
-        // "-o",
-        // `/local/out/${output || language}`, // 输出目录
     ];
     // 添加其他参数
     for (const { key, args } of commandMapping) {
@@ -64,7 +58,7 @@ app.post("/generate-code", async (c) => {
     }
     if (!output) {
         dockerArgs.push("--output");
-        dockerArgs.push(`/local/out/${language}`);
+        dockerArgs.push(`/local/out/${lang}`);
     }
     try {
         const result = await new Promise((resolve, reject) => {
@@ -88,7 +82,7 @@ app.post("/generate-code", async (c) => {
                 }
                 // 使用 JSZip 将生成的代码打包
                 const zip = new JSZip();
-                const outputDirPath = path.join("out", output || language);
+                const outputDirPath = path.join("out", output || lang);
                 const addFilesToZip = (dir, zipFolder) => {
                     const files = fs.readdirSync(dir);
                     files.forEach((file) => {
@@ -120,7 +114,7 @@ app.post("/generate-code", async (c) => {
             fs.unlinkSync(result);
             console.log("zip file deleted");
             //同时清理out文件夹
-            fs.rmdirSync(path.join("out", output || language), { recursive: true });
+            fs.rmdirSync(path.join("out", output || lang), { recursive: true });
         });
         requestProcessing = false;
         return c.body(stream);
