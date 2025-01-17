@@ -13,6 +13,9 @@ This is a server for receiving api requests and return the generated code from s
 2. Run `npm install`
 3. Run `npm run start`
 
+### Run in background
+1. Run `bash service.sh &`
+
 ## License
 MIT
 
