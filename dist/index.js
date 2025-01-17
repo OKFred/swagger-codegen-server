@@ -1,5 +1,6 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
+import { logger } from "hono/logger";
 import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
@@ -11,6 +12,7 @@ import { Readable } from "stream";
 // 获取当前文件路径
 const __filename = fileURLToPath(import.meta.url);
 const app = new Hono();
+app.use(logger());
 let requestProcessing = false;
 // API 路由
 app.post("/generate-code", async (c) => {
