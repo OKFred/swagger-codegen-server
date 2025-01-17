@@ -4,11 +4,11 @@ import { logger } from "hono/logger";
 import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
-import os from "os";
 import { fileURLToPath } from "url";
 import { commandMapping } from "./commandMapping.js";
 import JSZip from "jszip";
 import { Readable } from "stream";
+import { serveStatic } from "@hono/node-server/serve-static";
 // 获取当前文件路径
 const __filename = fileURLToPath(import.meta.url);
 const app = new Hono();
@@ -30,7 +30,7 @@ app.post("/generate-code", async (c) => {
     let tempSwaggerPath;
     if (!swaggerUrl) {
         // 将 Swagger JSON 保存到临时文件
-        tempSwaggerPath = path.join(os.tmpdir(), "swagger.json");
+        tempSwaggerPath = path.join("public", "swagger.json");
         fs.writeFileSync(tempSwaggerPath, swaggerJson);
         input = tempSwaggerPath;
     }
@@ -120,6 +120,7 @@ app.post("/generate-code", async (c) => {
         return c.json({ error: e instanceof Error ? e.message : String(e) }, 400);
     }
 });
+app.get("/public/*", serveStatic({ root: "./public" }));
 app.get("/", (c) => c.json({ ok: true, message: new Date().toLocaleString() }));
 app.notFound((c) => c.json({ error: "Not found" }, 404));
 // 启动服务器

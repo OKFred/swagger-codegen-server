@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import { commandMapping } from "./commandMapping.js";
 import JSZip from "jszip";
 import { Readable } from "stream";
+import { serveStatic } from "@hono/node-server/serve-static";
 
 // 获取当前文件路径
 const __filename = fileURLToPath(import.meta.url);
@@ -33,11 +34,10 @@ app.post("/generate-code", async (c) => {
     let tempSwaggerPath: string;
     if (!swaggerUrl) {
         // 将 Swagger JSON 保存到临时文件
-        tempSwaggerPath = path.join(os.tmpdir(), "swagger.json");
+        tempSwaggerPath = path.join("public", "swagger.json");
         fs.writeFileSync(tempSwaggerPath, swaggerJson);
         input = tempSwaggerPath;
     }
-
     // 构造 Docker 命令
     const imageName = "swaggerapi/swagger-codegen-cli";
     const mountDir = `${process.cwd()}:/local`; // 当前工作目录挂载到 Docker 容器中的 `/local`
@@ -126,6 +126,7 @@ app.post("/generate-code", async (c) => {
         return c.json({ error: e instanceof Error ? e.message : String(e) }, 400);
     }
 });
+app.get("/public/*", serveStatic({ root: "./public" }));
 app.get("/", (c) => c.json({ ok: true, message: new Date().toLocaleString() }));
 app.notFound((c) => c.json({ error: "Not found" }, 404));
 

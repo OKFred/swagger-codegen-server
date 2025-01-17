@@ -15,3 +15,7 @@ This is a server for receiving api requests and return the generated code from s
 
 ## License
 MIT
+
+## References
+- [Swagger Codegen](https://swagger.io/tools/swagger-codegen/)
+- [Swagger Codegen Repo](https://github.com/swagger-api/swagger-codegen?tab=readme-ov-file#to-generate-a-sample-client-library)
