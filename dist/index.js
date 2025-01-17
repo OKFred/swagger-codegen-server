@@ -98,6 +98,10 @@ app.post("/generate-code", async (c) => {
         c.header("Content-Disposition", `attachment; filename=code.zip`);
         const nodeStream = fs.createReadStream(result);
         const stream = Readable.toWeb(nodeStream);
+        nodeStream.on("close", () => {
+            fs.unlinkSync(result);
+            console.log("zip file deleted");
+        });
         requestProcessing = false;
         return c.body(stream);
     }
