@@ -6,6 +6,7 @@ import path from "path";
 import os from "os";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import JSZip from "jszip";
 
 // 获取当前文件路径
 const __filename = fileURLToPath(import.meta.url);
@@ -14,7 +15,7 @@ const __dirname = dirname(__filename);
 const app = new Hono();
 
 // API 路由
-app.post("/generate-code", async (c) => {
+app.route("/generate-code", async (c) => {
     const { swaggerUrl, swaggerJson, language, outputDir } = await c.req.json();
 
     if (!swaggerUrl && (!swaggerJson || !language)) {
@@ -29,7 +30,6 @@ app.post("/generate-code", async (c) => {
         input = tempSwaggerPath;
     }
     // 输出目录
-    const outputPath = path.resolve("./out", outputDir || language);
 
     // 构造 Docker 命令
     const dockerArgs = [
@@ -61,41 +61,46 @@ app.post("/generate-code", async (c) => {
     });
 
     // 捕获进程结束
-    dockerProcess.on("close", (code) => {
-        // 删除临时文件
-        if (tempSwaggerPath) fs.unlinkSync(tempSwaggerPath);
+    dockerProcess.on("close", async (code) => {
+      // 删除临时文件
+      if (tempSwaggerPath) fs.unlinkSync(tempSwaggerPath);
 
-        if (code !== 0) {
-            return c.json({ error: `Code generation failed with exit code ${code}` }, 500);
-        }
+      if (code !== 0) {
+        return c.json({ error: `Code generation failed with exit code ${code}` }, 500);
+      }
 
-        // 使用 zip 命令将生成的代码打包
-        const zipFilePath = path.join(__dirname, "out.zip");
-        const zipProcess = spawn("zip", ["-r", zipFilePath, `./out/${outputDir || language}`]);
+      // 使用 JSZip 将生成的代码打包
+      const zip = new JSZip();
+      const outputDirPath = path.join(__dirname, "out", outputDir || language);
 
-        // 捕获 zip 命令的输出
-        zipProcess.stdout.on("data", (data) => {
-            console.log(`zip stdout: ${data}`);
+      const addFilesToZip = (dir, zipFolder) => {
+        const files = fs.readdirSync(dir);
+        files.forEach((file) => {
+          const filePath = path.join(dir, file);
+          const stat = fs.statSync(filePath);
+          if (stat.isDirectory()) {
+            const folder = zipFolder.folder(file);
+            addFilesToZip(filePath, folder);
+          } else {
+            const fileData = fs.readFileSync(filePath);
+            zipFolder.file(file, fileData);
+          }
         });
+      };
 
-        zipProcess.stderr.on("data", (data) => {
-            console.error(`zip stderr: ${data}`);
-        });
+      addFilesToZip(outputDirPath, zip);
 
-        // 捕获 zip 命令结束
-        zipProcess.on("close", (zipCode) => {
-            if (zipCode === 0) {
-                // 读取生成的 zip 文件并返回
-                const fileStream = fs.createReadStream(zipFilePath);
-                c.header("Content-Type", "application/zip");
-                c.header("Content-Disposition", `attachment; filename=code.zip`);
+      const zipFilePath = path.join(__dirname, "out.zip");
+      const zipContent = await zip.generateAsync({ type: "nodebuffer" });
+      fs.writeFileSync(zipFilePath, zipContent);
 
-                // 使用 stream 流式传输文件内容
-                return fileStream.pipe(c.res);
-            } else {
-                return c.json({ error: "Failed to zip the generated code" }, 500);
-            }
-        });
+      // 读取生成的 zip 文件并返回
+      const fileStream = fs.createReadStream(zipFilePath);
+      c.header("Content-Type", "application/zip");
+      c.header("Content-Disposition", `attachment; filename=code.zip`);
+
+      // 使用 stream 流式传输文件内容
+      return fileStream.pipe(c.res);
     });
 });
 
