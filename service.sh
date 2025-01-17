@@ -11,6 +11,9 @@ main () {
   WorkingDirectory=/root/swagger-codegen-server
   ExecStart=npm install && npm start
   Restart=on-failure
+
+  [Install]
+  WantedBy=multi-user.target
   "
   echo "$service_content" > /etc/systemd/system/swagger-codegen-server.service
   systemctl daemon-reload
