@@ -41,17 +41,10 @@ app.post("/generate-code", async (c) => {
     // 构造 Docker 命令
     const imageName = "swaggerapi/swagger-codegen-cli";
     const mountDir = `${process.cwd()}:/local`; // 当前工作目录挂载到 Docker 容器中的 `/local`
-    const dockerArgs = [
-        "run",
-        "--rm",
-        "-v",
-        mountDir,
-        imageName,
-        "generate",
-    ];
+    const dockerArgs = ["run", "--rm", "-v", mountDir, imageName, "generate"];
     // 添加其他参数
-  for (const { key, args } of commandMapping) {
-      const value = bodyObj[key];
+    for (const { key, args } of commandMapping) {
+        const value = bodyObj[key];
         if (value) {
             dockerArgs.push(args);
             if (value !== "true") dockerArgs.push(value);
@@ -86,7 +79,7 @@ app.post("/generate-code", async (c) => {
                 if (tempSwaggerPath) fs.unlinkSync(tempSwaggerPath);
 
                 if (code !== 0) {
-                    return reject({ error: `Code generation failed with exit code ${code}` });
+                    return reject(new Error(`Code generation failed with exit code ${code}`));
                 }
 
                 // 使用 JSZip 将生成的代码打包
@@ -122,6 +115,7 @@ app.post("/generate-code", async (c) => {
         nodeStream.on("close", () => {
             fs.unlinkSync(result);
             console.log("zip file deleted");
+            console.log("success!");
             //同时清理out文件夹
             fs.rmdirSync(path.join("out", output || lang), { recursive: true });
         });
