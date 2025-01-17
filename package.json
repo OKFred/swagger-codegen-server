@@ -2,7 +2,7 @@
     "name": "swagger-codegen-server",
     "version": "1.0.0",
     "description": "serving apis for swagger-codegen",
-    "main": "index.js",
+    "main": "dist/index.js",
     "type": "module",
     "scripts": {
         "build": "tsc",
