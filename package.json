@@ -5,7 +5,9 @@
     "main": "index.js",
     "type": "module",
     "scripts": {
-        "start": "node index.js"
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "dev": "ts-node src/index.ts"
     },
     "author": "fredzh",
     "license": "MIT",
@@ -15,6 +17,7 @@
         "jszip": "^3.10.1"
     },
     "devDependencies": {
+        "typescript": "^5.7.3",
         "@types/node": "^22.10.7"
     }
 }
