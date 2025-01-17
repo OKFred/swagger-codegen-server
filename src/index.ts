@@ -1,4 +1,3 @@
-import "module-alias/register";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { spawn } from "child_process";
@@ -6,7 +5,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import { fileURLToPath } from "url";
-import { commandMapping } from "@/commandMapping.js";
+import { commandMapping } from "./commandMapping.js";
 import JSZip from "jszip";
 import { Readable } from "stream";
 

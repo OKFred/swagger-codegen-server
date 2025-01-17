@@ -9,9 +9,6 @@
         "start": "node dist/index.js",
         "dev": "ts-node src/index.ts"
     },
-    "_moduleAliases": {
-        "@": "dist"
-    },
     "keywords": [
         "code",
         "openapi"
