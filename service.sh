@@ -9,7 +9,7 @@ main () {
   [Service]
   Type=simple
   WorkingDirectory=/root/swagger-codegen-server
-  ExecStart=npm install && npm start
+  ExecStart=cd /root/swagger-codegen-server && npm install && npm start
   Restart=on-failure
 
   [Install]
