@@ -4,15 +4,9 @@ import { logger } from "hono/logger";
 import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
-import os from "os";
-import { fileURLToPath } from "url";
 import { commandMapping } from "./commandMapping.js";
 import JSZip from "jszip";
 import { Readable } from "stream";
-import { serveStatic } from "@hono/node-server/serve-static";
-
-// 获取当前文件路径
-const __filename = fileURLToPath(import.meta.url);
 
 const app = new Hono();
 app.use(logger());
@@ -30,18 +24,11 @@ app.post("/generate-code", async (c) => {
         requestProcessing = false;
         return c.json({ error: "Missing required parameters" }, 400);
     }
-    let input = swaggerUrl;
-    let tempSwaggerPath: string;
-    if (!swaggerUrl) {
-        // 将 Swagger JSON 保存到临时文件
-        tempSwaggerPath = path.join("public", "swagger.json");
-        fs.writeFileSync(tempSwaggerPath, swaggerJson);
-        input = 'http://host.docker.internal:8787/public/swagger.json';
-    }
     // 构造 Docker 命令
     const imageName = "swaggerapi/swagger-codegen-cli";
     const mountDir = `${process.cwd()}:/local`; // 当前工作目录挂载到 Docker 容器中的 `/local`
-    const dockerArgs = ["run", "--rm", "-v", mountDir, imageName, "generate"];
+    const dockerArgs = ["run", "--rm", "-v", mountDir, imageName];
+    dockerArgs.push("generate");
     // 添加其他参数
     for (const { key, args } of commandMapping) {
         const value = bodyObj[key];
@@ -49,6 +36,14 @@ app.post("/generate-code", async (c) => {
             dockerArgs.push(args);
             if (value !== "true") dockerArgs.push(value);
         }
+    }
+    let input = swaggerUrl;
+    let tempSwaggerPath: string;
+    if (!swaggerUrl) {
+        // 将 Swagger JSON 保存到临时文件
+        tempSwaggerPath = "swagger.json";
+        fs.writeFileSync(tempSwaggerPath, swaggerJson);
+        input = "/local/swagger.json";
     }
     if (input) {
         dockerArgs.push("--input-spec");
@@ -126,7 +121,7 @@ app.post("/generate-code", async (c) => {
         return c.json({ error: e instanceof Error ? e.message : String(e) }, 400);
     }
 });
-app.get("/public/*", serveStatic({ root: "./public" }));
+// app.get("/public/*", serveStatic({ root: "./public" }));
 app.get("/", (c) => c.json({ ok: true, message: new Date().toLocaleString() }));
 app.notFound((c) => c.json({ error: "Not found" }, 404));
 
