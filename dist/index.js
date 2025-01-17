@@ -67,9 +67,10 @@ app.post("/generate-code", async (c) => {
             // 捕获进程结束
             dockerProcess.on("close", async (code) => {
                 // 删除临时文件
-                if (tempSwaggerPath)
-                    fs.unlinkSync(tempSwaggerPath);
                 if (code !== 0) {
+                    console.log("clean up...");
+                    if (tempSwaggerPath)
+                        fs.unlinkSync(tempSwaggerPath);
                     return reject(new Error(`Code generation failed with exit code ${code}`));
                 }
                 // 使用 JSZip 将生成的代码打包
@@ -103,11 +104,15 @@ app.post("/generate-code", async (c) => {
         const nodeStream = fs.createReadStream(result);
         const stream = Readable.toWeb(nodeStream);
         nodeStream.on("close", () => {
+            console.log("clean up...");
+            // 删除生成的 zip 文件
             fs.unlinkSync(result);
-            console.log("zip file deleted");
-            console.log("success!");
+            // 删除临时文件
+            if (tempSwaggerPath)
+                fs.unlinkSync(tempSwaggerPath);
             //同时清理out文件夹
             fs.rmdirSync(path.join("out", output || lang), { recursive: true });
+            console.log("success!");
         });
         requestProcessing = false;
         return c.body(stream);
