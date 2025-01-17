@@ -111,6 +111,12 @@ app.post("/generate-code", async (c) => {
         mountDir,
         imageName,
         "generate",
+        // "-i",
+        // input,
+        // "-l",
+        // language,
+        // "-o",
+        // `/local/out/${output || language}`, // 输出目录
     ];
     // 添加其他参数
     for (const [key, value] of Object.entries(paramObj)) {
@@ -119,7 +125,10 @@ app.post("/generate-code", async (c) => {
             dockerArgs.push(value);
         }
     }
-    //检查output是否存在
+    if (input) {
+        dockerArgs.push("--input");
+        dockerArgs.push(input);
+    }
     if (!output) {
         dockerArgs.push("--output");
         dockerArgs.push(`/local/out/${language}`);
