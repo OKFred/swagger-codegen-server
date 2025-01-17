@@ -15,11 +15,17 @@ const __dirname = dirname(__filename);
 
 const app = new Hono();
 
+let requestProcessing = false;
 // API 路由
 app.post("/generate-code", async (c) => {
+    if (requestProcessing) {
+        return c.json({ error: "Another request is being processed" }, 400);
+    }
+    requestProcessing = true;
     const { swaggerUrl, swaggerJson, language, outputDir } = await c.req.json();
 
     if (!swaggerUrl && (!swaggerJson || !language)) {
+        requestProcessing = false;
         return c.json({ error: "Missing required parameters" }, 400);
     }
     let input = swaggerUrl;
@@ -102,8 +108,10 @@ app.post("/generate-code", async (c) => {
         c.header("Content-Disposition", `attachment; filename=code.zip`);
         const nodeStream = fs.createReadStream(result);
         const stream = Readable.toWeb(nodeStream) as ReadableStream;
+        requestProcessing = false;
         return c.body(stream);
     } catch (e) {
+        requestProcessing = false;
         return c.json({ error: e instanceof Error ? e.message : String(e) }, 400);
     }
 });
