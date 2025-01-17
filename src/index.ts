@@ -11,7 +11,6 @@ import { Readable } from "stream";
 
 // 获取当前文件路径
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 const app = new Hono();
 
@@ -80,7 +79,7 @@ app.post("/generate-code", async (c) => {
 
                 // 使用 JSZip 将生成的代码打包
                 const zip = new JSZip();
-                const outputDirPath = path.join(__dirname, "out", outputDir || language);
+                const outputDirPath = path.join("out", outputDir || language);
 
                 const addFilesToZip = (dir: string, zipFolder: JSZip) => {
                     const files = fs.readdirSync(dir);
@@ -98,7 +97,7 @@ app.post("/generate-code", async (c) => {
                 };
                 addFilesToZip(outputDirPath, zip);
 
-                const zipFilePath = path.join(__dirname, "out.zip");
+                const zipFilePath = "out.zip";
                 const zipContent = await zip.generateAsync({ type: "nodebuffer" });
                 fs.writeFileSync(zipFilePath, zipContent);
                 return resolve(zipFilePath);

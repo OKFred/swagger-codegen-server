@@ -5,12 +5,10 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import { fileURLToPath } from "url";
-import { dirname } from "path";
 import JSZip from "jszip";
 import { Readable } from "stream";
 // 获取当前文件路径
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 const app = new Hono();
 let requestProcessing = false;
 // API 路由
@@ -70,7 +68,7 @@ app.post("/generate-code", async (c) => {
                 }
                 // 使用 JSZip 将生成的代码打包
                 const zip = new JSZip();
-                const outputDirPath = path.join(__dirname, "out", outputDir || language);
+                const outputDirPath = path.join("out", outputDir || language);
                 const addFilesToZip = (dir, zipFolder) => {
                     const files = fs.readdirSync(dir);
                     files.forEach((file) => {
@@ -88,7 +86,7 @@ app.post("/generate-code", async (c) => {
                     });
                 };
                 addFilesToZip(outputDirPath, zip);
-                const zipFilePath = path.join(__dirname, "out.zip");
+                const zipFilePath = "out.zip";
                 const zipContent = await zip.generateAsync({ type: "nodebuffer" });
                 fs.writeFileSync(zipFilePath, zipContent);
                 return resolve(zipFilePath);
