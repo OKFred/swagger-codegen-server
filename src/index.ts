@@ -57,7 +57,7 @@ app.post("/generate-code", async (c) => {
     for (const { key, args } of commandMapping) {
         if (bodyObj[key]) {
             dockerArgs.push(args);
-            if (bodyObj[key] !== "true") dockerArgs.push(bodyObj[key]);
+            if (typeof bodyObj[key] !== "boolean") dockerArgs.push(bodyObj[key]);
         }
     }
     if (input) {
