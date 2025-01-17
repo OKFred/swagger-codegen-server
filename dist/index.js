@@ -17,7 +17,40 @@ app.post("/generate-code", async (c) => {
         return c.json({ error: "Another request is being processed" }, 400);
     }
     requestProcessing = true;
-    const { swaggerUrl, swaggerJson, language, outputDir } = await c.req.json();
+    const bodyObj = await c.req.json();
+    const { swaggerUrl, swaggerJson, authorization, additionalProperties, apiPackage, artifactId, artifactVersion, config, systemProperties, gitRepoId, gitUserId, groupId, httpUserAgent, inputSpec, ignoreFileOverride, importMappings, instantiationTypes, invokerPackage, language, languageSpecificPrimitives, library, modelNamePrefix, modelNameSuffix, modelPackage, output, releaseNote, removeOperationIdPrefix, reservedWordsMappings, skipOverwrite, templateDir, typeMappings, verbose, } = bodyObj;
+    const paramObj = {
+        authorization,
+        additionalProperties,
+        apiPackage,
+        artifactId,
+        artifactVersion,
+        config,
+        systemProperties,
+        gitRepoId,
+        gitUserId,
+        groupId,
+        httpUserAgent,
+        inputSpec,
+        ignoreFileOverride,
+        importMappings,
+        instantiationTypes,
+        invokerPackage,
+        language,
+        languageSpecificPrimitives,
+        library,
+        modelNamePrefix,
+        modelNameSuffix,
+        modelPackage,
+        output,
+        releaseNote,
+        removeOperationIdPrefix,
+        reservedWordsMappings,
+        skipOverwrite,
+        templateDir,
+        typeMappings,
+        verbose,
+    };
     if (!swaggerUrl && (!swaggerJson || !language)) {
         requestProcessing = false;
         return c.json({ error: "Missing required parameters" }, 400);
@@ -30,22 +63,29 @@ app.post("/generate-code", async (c) => {
         fs.writeFileSync(tempSwaggerPath, swaggerJson);
         input = tempSwaggerPath;
     }
-    // 输出目录
     // 构造 Docker 命令
+    const imageName = "swaggerapi/swagger-codegen-cli";
+    const mountDir = `${process.cwd()}:/local`; // 当前工作目录挂载到 Docker 容器中的 `/local`
     const dockerArgs = [
         "run",
         "--rm",
         "-v",
-        `${process.cwd()}:/local`, // 当前工作目录挂载到 Docker 容器中的 `/local`
-        "swaggerapi/swagger-codegen-cli",
+        mountDir,
+        imageName,
         "generate",
-        "-i",
-        input,
-        "-l",
-        language,
-        "-o",
-        `/local/out/${outputDir || language}`, // 输出目录
     ];
+    // 添加其他参数
+    for (const [key, value] of Object.entries(paramObj)) {
+        if (value) {
+            dockerArgs.push(`--${key}`);
+            dockerArgs.push(value);
+        }
+    }
+    //检查output是否存在
+    if (!output) {
+        dockerArgs.push("--output");
+        dockerArgs.push(`/local/out/${language}`);
+    }
     try {
         const result = await new Promise((resolve, reject) => {
             // 执行命令
@@ -68,7 +108,7 @@ app.post("/generate-code", async (c) => {
                 }
                 // 使用 JSZip 将生成的代码打包
                 const zip = new JSZip();
-                const outputDirPath = path.join("out", outputDir || language);
+                const outputDirPath = path.join("out", output || language);
                 const addFilesToZip = (dir, zipFolder) => {
                     const files = fs.readdirSync(dir);
                     files.forEach((file) => {
@@ -100,7 +140,7 @@ app.post("/generate-code", async (c) => {
             fs.unlinkSync(result);
             console.log("zip file deleted");
             //同时清理out文件夹
-            fs.rmdirSync(path.join("out", outputDir || language), { recursive: true });
+            fs.rmdirSync(path.join("out", output || language), { recursive: true });
         });
         requestProcessing = false;
         return c.body(stream);
