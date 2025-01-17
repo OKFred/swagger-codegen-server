@@ -32,7 +32,7 @@ app.post("/generate-code", async (c) => {
         // 将 Swagger JSON 保存到临时文件
         tempSwaggerPath = path.join("public", "swagger.json");
         fs.writeFileSync(tempSwaggerPath, swaggerJson);
-        input = tempSwaggerPath;
+        input = 'http://host.docker.internal:8787/public/swagger.json';
     }
     // 构造 Docker 命令
     const imageName = "swaggerapi/swagger-codegen-cli";
