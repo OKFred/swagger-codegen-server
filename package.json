@@ -9,6 +9,9 @@
         "start": "node dist/index.js",
         "dev": "ts-node src/index.ts"
     },
+    "_moduleAliases": {
+        "@": "dist"
+    },
     "keywords": [
         "code",
         "openapi"
@@ -18,10 +21,11 @@
     "dependencies": {
         "@hono/node-server": "^1.13.7",
         "hono": "^4.6.16",
-        "jszip": "^3.10.1"
+        "jszip": "^3.10.1",
+        "module-alias": "^2.2.3"
     },
     "devDependencies": {
-        "typescript": "^5.7.3",
-        "@types/node": "^22.10.7"
+        "@types/node": "^22.10.7",
+        "typescript": "^5.7.3"
     }
 }
