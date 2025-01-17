@@ -5,7 +5,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import { fileURLToPath } from "url";
-import { dirname } from "path";
+import { commandMapping } from "@/commandMapping.js";
 import JSZip from "jszip";
 import { Readable } from "stream";
 
@@ -22,72 +22,7 @@ app.post("/generate-code", async (c) => {
     }
     requestProcessing = true;
     const bodyObj = await c.req.json();
-    const {
-        swaggerUrl,
-        swaggerJson,
-        authorization,
-        additionalProperties,
-        apiPackage,
-        artifactId,
-        artifactVersion,
-        config,
-        systemProperties,
-        gitRepoId,
-        gitUserId,
-        groupId,
-        httpUserAgent,
-        inputSpec,
-        ignoreFileOverride,
-        importMappings,
-        instantiationTypes,
-        invokerPackage,
-        language,
-        languageSpecificPrimitives,
-        library,
-        modelNamePrefix,
-        modelNameSuffix,
-        modelPackage,
-        output,
-        releaseNote,
-        removeOperationIdPrefix,
-        reservedWordsMappings,
-        skipOverwrite,
-        templateDir,
-        typeMappings,
-        verbose,
-    } = bodyObj;
-    const paramObj = {
-        authorization,
-        additionalProperties,
-        apiPackage,
-        artifactId,
-        artifactVersion,
-        config,
-        systemProperties,
-        gitRepoId,
-        gitUserId,
-        groupId,
-        httpUserAgent,
-        inputSpec,
-        ignoreFileOverride,
-        importMappings,
-        instantiationTypes,
-        invokerPackage,
-        language,
-        languageSpecificPrimitives,
-        library,
-        modelNamePrefix,
-        modelNameSuffix,
-        modelPackage,
-        output,
-        releaseNote,
-        removeOperationIdPrefix,
-        reservedWordsMappings,
-        skipOverwrite,
-        templateDir,
-        typeMappings,
-        verbose,
-    };
+    const { swaggerUrl, swaggerJson, language, output } = bodyObj;
     if (!swaggerUrl && (!swaggerJson || !language)) {
         requestProcessing = false;
         return c.json({ error: "Missing required parameters" }, 400);
@@ -119,14 +54,14 @@ app.post("/generate-code", async (c) => {
         // `/local/out/${output || language}`, // 输出目录
     ];
     // 添加其他参数
-    for (const [key, value] of Object.entries(paramObj)) {
-        if (value) {
-            dockerArgs.push(`--${key}`);
-            dockerArgs.push(value);
+    for (const { key, args } of commandMapping) {
+        if (bodyObj[key]) {
+            dockerArgs.push(args);
+            dockerArgs.push(bodyObj[key]);
         }
     }
     if (input) {
-        dockerArgs.push("--input");
+        dockerArgs.push("--input-spec");
         dockerArgs.push(input);
     }
     if (!output) {
