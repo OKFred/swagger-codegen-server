@@ -51,10 +51,11 @@ app.post("/generate-code", async (c) => {
     ];
     // 添加其他参数
     for (const { key, args } of commandMapping) {
-        if (bodyObj[key]) {
+        const value = bodyObj[key];
+        if (value) {
             dockerArgs.push(args);
-            if (typeof bodyObj[key] !== "boolean")
-                dockerArgs.push(bodyObj[key]);
+            if (value !== "true")
+                dockerArgs.push(value);
         }
     }
     if (input) {

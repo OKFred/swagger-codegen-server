@@ -54,10 +54,11 @@ app.post("/generate-code", async (c) => {
         // `/local/out/${output || language}`, // 输出目录
     ];
     // 添加其他参数
-    for (const { key, args } of commandMapping) {
-        if (bodyObj[key]) {
+  for (const { key, args } of commandMapping) {
+      const value = bodyObj[key];
+        if (value) {
             dockerArgs.push(args);
-            if (typeof bodyObj[key] !== "boolean") dockerArgs.push(bodyObj[key]);
+            if (value !== "true") dockerArgs.push(value);
         }
     }
     if (input) {
