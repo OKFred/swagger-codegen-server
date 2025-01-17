@@ -21,9 +21,10 @@ app.post("/generate-code", async (c) => {
         return c.json({ error: "Missing required parameters" }, 400);
     }
     let input = swaggerUrl;
+    let tempSwaggerPath;
     if (!swaggerUrl) {
         // 将 Swagger JSON 保存到临时文件
-        const tempSwaggerPath = path.join(os.tmpdir(), "swagger.json");
+        tempSwaggerPath = path.join(os.tmpdir(), "swagger.json");
         fs.writeFileSync(tempSwaggerPath, swaggerJson);
         input = tempSwaggerPath;
     }
