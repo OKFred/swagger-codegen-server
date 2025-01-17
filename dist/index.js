@@ -99,6 +99,8 @@ app.post("/generate-code", async (c) => {
         nodeStream.on("close", () => {
             fs.unlinkSync(result);
             console.log("zip file deleted");
+            //同时清理out文件夹
+            fs.rmdirSync(path.join("out", outputDir || language), { recursive: true });
         });
         requestProcessing = false;
         return c.body(stream);
