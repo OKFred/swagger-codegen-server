@@ -8,8 +8,6 @@
         "rootDir": "./src",
         "strict": true,
         "resolveJsonModule": true,
-        "allowImportingTsExtensions": true,
-        "noEmit": true,
         "lib": ["ES2020", "DOM"],
         "baseUrl": ".",
         "paths": {
