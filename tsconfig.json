@@ -8,6 +8,10 @@
         "rootDir": "./src",
         "strict": true,
         "resolveJsonModule": true,
-        "lib": ["ES2020", "DOM"]
+        "lib": ["ES2020", "DOM"],
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["src/*"]
+        }
     }
 }

@@ -9,6 +9,10 @@
         "start": "node dist/index.js",
         "dev": "ts-node src/index.ts"
     },
+    "keywords": [
+        "code",
+        "openapi"
+    ],
     "author": "fredzh",
     "license": "MIT",
     "dependencies": {
