@@ -17,13 +17,17 @@ app.post("/generate-code", async (c) => {
     }
     requestProcessing = true;
     const bodyObj = await c.req.json();
-    const { swaggerUrl, swaggerJson, lang, output } = bodyObj;
+    const { swaggerUrl, swaggerJson, swaggerVersion, lang, output } = bodyObj;
     if (!swaggerUrl && (!swaggerJson || !lang)) {
         requestProcessing = false;
         return c.json({ error: "Missing required parameters" }, 400);
     }
     // 构造 Docker 命令
-    const imageName = "swaggerapi/swagger-codegen-cli";
+    const imageArr = [
+        { tag: "v2", name: "swaggerapi/swagger-codegen-cli" },
+        { tag: "v3", name: "swaggerapi/swagger-codegen-cli-v3" },
+    ];
+    const imageName = /3/.test(swaggerVersion) ? imageArr[1].name : imageArr[0].name;
     const mountDir = `${process.cwd()}:/local`; // 当前工作目录挂载到 Docker 容器中的 `/local`
     const dockerArgs = ["run", "--rm", "-v", mountDir, imageName];
     dockerArgs.push("generate");
