@@ -34,8 +34,7 @@ app.post("/generate-code", async (c) => {
     // 添加其他参数
     const lang = args["lang"];
     let output = args["output"] ? args["output"] : lang;
-    output = "/local/out/zip/" + output;
-    args["output"] = output;
+    args["output"] = "/local/out/zip/" + output;
     const zipPath = path.join("./out/zip/", output || lang);
     for (const obj of commandMapping) {
         const value = args[obj["key"]];
