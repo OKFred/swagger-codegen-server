@@ -80,6 +80,10 @@ app.post("/generate-code", async (c) => {
                 // 使用 JSZip 将生成的代码打包
                 const zip = new JSZip();
                 const outputDirPath = path.join("out", output || lang);
+                //检查文件夹是否存在
+                if (!fs.existsSync(outputDirPath)) {
+                    fs.mkdirSync(outputDirPath, { recursive: true });
+                }
                 const addFilesToZip = (dir: string, zipFolder: JSZip) => {
                     const files = fs.readdirSync(dir);
                     files.forEach((file) => {

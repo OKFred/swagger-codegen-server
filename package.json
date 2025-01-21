@@ -1,6 +1,6 @@
 {
     "name": "swagger-codegen-server",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "description": "serving apis for swagger-codegen",
     "main": "dist/index.js",
     "type": "module",
