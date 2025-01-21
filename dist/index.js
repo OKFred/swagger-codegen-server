@@ -17,8 +17,8 @@ app.post("/generate-code", async (c) => {
     }
     requestProcessing = true;
     const bodyObj = await c.req.json();
-    const { swaggerUrl, swaggerJson, swaggerVersion, lang } = bodyObj;
-    if (!swaggerUrl && (!swaggerJson || !lang)) {
+    const { swaggerUrl, swaggerJson, swaggerVersion, server, ...args } = bodyObj;
+    if (!swaggerUrl && (!swaggerJson || !args["lang"])) {
         requestProcessing = false;
         return c.json({ error: "Missing required parameters" }, 400);
     }
@@ -32,12 +32,12 @@ app.post("/generate-code", async (c) => {
     const dockerArgs = ["run", "--rm", "-v", mountDir, imageName];
     dockerArgs.push("generate");
     // 添加其他参数
+    const lang = args["lang"];
     const output = bodyObj["output"] || lang;
-    bodyObj["output"] = output;
-    for (const { key, args } of commandMapping) {
-        const value = bodyObj[key];
+    for (const obj of commandMapping) {
+        const value = args[obj["key"]];
         if (value) {
-            dockerArgs.push(args);
+            dockerArgs.push(obj["args"]);
             if (value !== "true")
                 dockerArgs.push(value);
         }
@@ -50,7 +50,7 @@ app.post("/generate-code", async (c) => {
         fs.writeFileSync(tempSwaggerPath, swaggerJson);
         input = "/local/swagger.json";
     }
-    if (input) {
+    if (!args["input-spec"]) {
         dockerArgs.push("--input-spec");
         dockerArgs.push(input);
     }
