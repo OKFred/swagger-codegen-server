@@ -28,14 +28,15 @@ app.post("/generate-code", async (c) => {
         { tag: "v3", name: "swaggerapi/swagger-codegen-cli-v3" },
     ];
     const imageName = /3/.test(swaggerVersion) ? imageArr[1].name : imageArr[0].name;
-    const mountDir = `${process.cwd()}:/local`; // 当前工作目录挂载到 Docker 容器中的 `/local`
+    const mountDir = `${process.cwd()}/tmp:/local`; // 当前工作目录挂载到 Docker 容器中的 `/local`
     const dockerArgs = ["run", "--rm", "-v", mountDir, imageName];
     dockerArgs.push("generate");
     // 添加其他参数
     const lang = args["lang"];
     let output = args["output"] ? args["output"] : lang;
-    args["output"] = "/local/out/zip/" + output;
-    const zipPath = path.join("./out/zip/", output || lang);
+    args["output"] = "/local/out/" + output;
+    const zipPath = path.join("./tmp/out/", output || lang);
+    const zipFilePath = "./tmp/code.zip";
     for (const obj of commandMapping) {
         const value = args[obj["key"]];
         if (value) {
@@ -48,9 +49,9 @@ app.post("/generate-code", async (c) => {
     let tempSwaggerPath;
     if (!swaggerUrl) {
         // 将 Swagger JSON 保存到临时文件
-        tempSwaggerPath = "swagger.json";
+        tempSwaggerPath = "./tmp/input/swagger.json";
         fs.writeFileSync(tempSwaggerPath, swaggerJson);
-        input = "/local/swagger.json";
+        input = "/local/input/swagger.json";
     }
     if (!args["input-spec"]) {
         dockerArgs.push("--input-spec");
@@ -101,7 +102,6 @@ app.post("/generate-code", async (c) => {
                     });
                 };
                 addFilesToZip(zipPath, zip);
-                const zipFilePath = "out.zip";
                 const zipContent = await zip.generateAsync({ type: "nodebuffer" });
                 fs.writeFileSync(zipFilePath, zipContent);
                 return resolve(zipFilePath);
