@@ -9,6 +9,15 @@ import JSZip from "jszip";
 import { Readable } from "stream";
 const app = new Hono();
 app.use(logger());
+function init() {
+    if (!fs.existsSync("./tmp/input")) {
+        fs.mkdirSync("./tmp/input", { recursive: true });
+    }
+    if (!fs.existsSync("./tmp/output")) {
+        fs.mkdirSync("./tmp/output", { recursive: true });
+    }
+}
+init();
 let requestProcessing = false;
 // API 路由
 app.post("/generate-code", async (c) => {
@@ -34,8 +43,8 @@ app.post("/generate-code", async (c) => {
     // 添加其他参数
     const lang = args["lang"];
     let output = args["output"] ? args["output"] : lang;
-    args["output"] = "/local/out/" + output;
-    const zipPath = path.join("./tmp/out/", output || lang);
+    args["output"] = "/local/output/" + output;
+    const zipPath = path.join("./tmp/output/", output || lang);
     const zipFilePath = "./tmp/code.zip";
     for (const obj of commandMapping) {
         const value = args[obj["key"]];
