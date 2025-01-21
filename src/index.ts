@@ -35,8 +35,8 @@ app.post("/generate-code", async (c) => {
     dockerArgs.push("generate");
     // 添加其他参数
     const lang = args["lang"];
-    const output = args["output-spec"] || lang;
-    bodyObj["output-spec"] = output;
+    const output = args["output"] || lang;
+    bodyObj["output"] = output;
     for (const obj of commandMapping) {
         const value = args[obj["key"]];
         if (value) {
