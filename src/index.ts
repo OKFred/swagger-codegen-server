@@ -37,7 +37,7 @@ app.post("/generate-code", async (c) => {
     const lang = args["lang"];
     let output = args["output"] ? args["output"] : lang;
     output = "/local/" + output;
-    bodyObj["output"] = output;
+    args["output"] = output;
     for (const obj of commandMapping) {
         const value = args[obj["key"]];
         if (value) {
