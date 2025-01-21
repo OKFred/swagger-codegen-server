@@ -34,8 +34,9 @@ app.post("/generate-code", async (c) => {
     // 添加其他参数
     const lang = args["lang"];
     let output = args["output"] ? args["output"] : lang;
-    output = "/local/zip/" + output;
+    output = "/local/out/zip/" + output;
     args["output"] = output;
+    const zipPath = path.join("./out/zip/", output || lang);
     for (const obj of commandMapping) {
         const value = args[obj["key"]];
         if (value) {
@@ -80,10 +81,9 @@ app.post("/generate-code", async (c) => {
                 }
                 // 使用 JSZip 将生成的代码打包
                 const zip = new JSZip();
-                const outputDirPath = path.join("./zip", output || lang);
                 //检查文件夹是否存在
-                if (!fs.existsSync(outputDirPath)) {
-                    fs.mkdirSync(outputDirPath, { recursive: true });
+                if (!fs.existsSync(zipPath)) {
+                    fs.mkdirSync(zipPath, { recursive: true });
                 }
                 const addFilesToZip = (dir, zipFolder) => {
                     const files = fs.readdirSync(dir);
@@ -101,7 +101,7 @@ app.post("/generate-code", async (c) => {
                         }
                     });
                 };
-                addFilesToZip(outputDirPath, zip);
+                addFilesToZip(zipPath, zip);
                 const zipFilePath = "out.zip";
                 const zipContent = await zip.generateAsync({ type: "nodebuffer" });
                 fs.writeFileSync(zipFilePath, zipContent);
@@ -120,7 +120,7 @@ app.post("/generate-code", async (c) => {
             if (tempSwaggerPath)
                 fs.unlinkSync(tempSwaggerPath);
             //同时清理out文件夹
-            fs.rmdirSync(path.join("./zip", output || lang), { recursive: true });
+            fs.rmdirSync(zipPath, { recursive: true });
             console.log("success!");
         });
         requestProcessing = false;
