@@ -17,7 +17,7 @@ app.post("/generate-code", async (c) => {
     }
     requestProcessing = true;
     const bodyObj = await c.req.json();
-    const { swaggerUrl, swaggerJson, swaggerVersion, lang, output } = bodyObj;
+    const { swaggerUrl, swaggerJson, swaggerVersion, lang } = bodyObj;
     if (!swaggerUrl && (!swaggerJson || !lang)) {
         requestProcessing = false;
         return c.json({ error: "Missing required parameters" }, 400);
@@ -32,6 +32,7 @@ app.post("/generate-code", async (c) => {
     const dockerArgs = ["run", "--rm", "-v", mountDir, imageName];
     dockerArgs.push("generate");
     // 添加其他参数
+    const output = bodyObj["output"] || lang;
     for (const { key, args } of commandMapping) {
         const value = bodyObj[key];
         if (value) {
@@ -51,10 +52,6 @@ app.post("/generate-code", async (c) => {
     if (input) {
         dockerArgs.push("--input-spec");
         dockerArgs.push(input);
-    }
-    if (!output) {
-        dockerArgs.push("--output");
-        dockerArgs.push(`/local/out/${lang}`);
     }
     try {
         const result = await new Promise((resolve, reject) => {
