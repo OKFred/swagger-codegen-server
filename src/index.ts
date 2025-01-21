@@ -36,7 +36,7 @@ app.post("/generate-code", async (c) => {
     // 添加其他参数
     const lang = args["lang"];
     let output = args["output"] ? args["output"] : lang;
-    output = "/local/" + output;
+    output = "/local/zip/" + output;
     args["output"] = output;
     for (const obj of commandMapping) {
         const value = args[obj["key"]];
@@ -57,6 +57,7 @@ app.post("/generate-code", async (c) => {
         dockerArgs.push("--input-spec");
         dockerArgs.push(input);
     }
+    console.log(dockerArgs?.join(" "));
     try {
         const result: fs.PathLike = await new Promise((resolve, reject) => {
             // 执行命令
@@ -79,7 +80,7 @@ app.post("/generate-code", async (c) => {
                 }
                 // 使用 JSZip 将生成的代码打包
                 const zip = new JSZip();
-                const outputDirPath = path.join("out", output || lang);
+                const outputDirPath = path.join("./zip", output || lang);
                 //检查文件夹是否存在
                 if (!fs.existsSync(outputDirPath)) {
                     fs.mkdirSync(outputDirPath, { recursive: true });
@@ -116,7 +117,7 @@ app.post("/generate-code", async (c) => {
             // 删除临时文件
             if (tempSwaggerPath) fs.unlinkSync(tempSwaggerPath);
             //同时清理out文件夹
-            fs.rmdirSync(path.join("out", output || lang), { recursive: true });
+            fs.rmdirSync(path.join("./zip", output || lang), { recursive: true });
             console.log("success!");
         });
         requestProcessing = false;
