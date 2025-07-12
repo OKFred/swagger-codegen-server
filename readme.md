@@ -1,6 +1,6 @@
 # Swagger Codegen Server
 
-# [中文文档](./readme-zh_CN.md)
+# [中文文档](https://github.com/OKFred/swagger-codegen-server/blob/master/readme-zh_CN.md)
 
 ## Description
 
